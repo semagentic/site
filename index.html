@@ -466,7 +466,9 @@
     <span class="kicker" style="position:relative"><span class="dot"></span>Early access</span>
     <h2 style="margin-top:16px">Want in early?</h2>
     <p>We're not shipping yet, still building the boundaries. Leave your email and we'll reach out when there's something real to run and more to share.</p>
-    <form class="wait" id="waitForm" novalidate>
+    <form class="wait" id="waitForm" action="https://api.staticforms.dev/submit" method="POST">
+      <input type="hidden" name="apiKey" value="sf_3caa1bcb2ff9bb93996d2edb">
+      <input type="text" name="honeypot" style="display:none">
       <input type="email" id="email" placeholder="you@company.com" aria-label="Email address" required>
       <button type="submit" class="btn btn-primary">Join the waitlist</button>
     </form>
