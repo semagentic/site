@@ -469,7 +469,6 @@
     <form class="wait" id="waitForm" action="https://api.staticforms.dev/submit" method="POST">
       <input type="hidden" name="apiKey" value="sf_3caa1bcb2ff9bb93996d2edb">
       <input type="hidden" name="subject" value="Semagentic mailing list submission">
-      <input type="hidden" name="message" value="Waitlist signup">
       <input type="text" name="honeypot" style="display:none">
       <input type="email" name="email" id="email" placeholder="you@company.com" aria-label="Email address" required>
       <button type="submit" class="btn btn-primary">Join the waitlist</button>
@@ -496,12 +495,14 @@
   },{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-  // waitlist (front-end only for now; swap in a real endpoint later)
+  // waitlist — validates, then POSTs to StaticForms and shows the thanks message on success
   const form = document.getElementById('waitForm');
   const email = document.getElementById('email');
   const note = document.getElementById('formNote');
   const thanks = document.getElementById('thanks');
-  form.addEventListener('submit',(e)=>{
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const v = email.value.trim();
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -511,9 +512,34 @@
       note.style.color = '#ff6b8b';
       return;
     }
-    form.style.display='none';
-    note.style.display='none';
-    thanks.style.display='block';
+
+    // disable button while sending so people can't double-submit
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Joining…';
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),      // grabs apiKey, subject, message, honeypot, email
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if(res.ok){
+        form.style.display = 'none';
+        note.style.display = 'none';
+        thanks.style.display = 'block';
+      } else {
+        note.textContent = 'Something went wrong. Please try again.';
+        note.style.color = '#ff6b8b';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Join the waitlist';
+      }
+    } catch (err) {
+      note.textContent = 'Network error. Please try again.';
+      note.style.color = '#ff6b8b';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Join the waitlist';
+    }
   });
 </script>
 </body>
